@@ -3,16 +3,22 @@ package com.i18n.main;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
-import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.expr.StringLiteralExpr;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
+import org.xml.sax.SAXException;
+
 import com.i18n.file.FileHelper;
+import com.i18n.file.XmlHelper;
 
 public class main {
 
@@ -20,38 +26,26 @@ public class main {
 	 * @param args
 	 * @throws ParseException 
 	 * @throws IOException 
+	 * @throws TransformerException 
+	 * @throws ParserConfigurationException 
+	 * @throws SAXException 
 	 */
-	public static void main(String[] args) throws ParseException, IOException {
-		FileInputStream in = new FileInputStream("test/testcase.java");
+	public static void main(final String[] args) throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
+		
 		FileHelper file_help = new FileHelper();
-		List<File> fileList = file_help.getFileList("src/", "java");
+		List<File> fileList = file_help.getFileList("test/", "java");
 		for (File file : fileList) {
-			System.out.println(file.getAbsolutePath());
+			System.out.println("-->parsing:" + file.getAbsolutePath());
+			parserFile(file.getAbsolutePath());
 		}
-        CompilationUnit cu;
-        try {
-            // parse the file
-            cu = JavaParser.parse(in);
-        } finally {
-            in.close();
-        }
-
-        // visit and print the methods names
-        new MethodVisitor().visit(cu, null);
-        
-        
+		XmlHelper xmlhelper= new XmlHelper.Builder()
+							.setDebug(false)
+							.setFilePath("out/string.xml").build();
+		xmlhelper.write(new SimpleEntry<String, String>("name", "你好啦"));
+		
 	}
 	
-	private static class MethodVisitor extends VoidVisitorAdapter {
-
-        @Override
-        public void visit(MethodDeclaration n, Object arg) {
-            // here you can access the attributes of the method.
-            // this method will be called for all methods in this 
-            // CompilationUnit, including inner class methods
-            System.out.println(n.getName());
-            super.visit(n, arg);
-        }
+	private static class StringVisitor extends VoidVisitorAdapter {
         
         @Override
         public void visit(StringLiteralExpr n, Object arg) {
@@ -59,5 +53,18 @@ public class main {
         	super.visit(n, arg);
         }
     }
+	
+	private static void parserFile(String filepath) throws ParseException, IOException {
+		FileInputStream in = new FileInputStream(filepath);
+		CompilationUnit cu ;
+		try {
+			cu = JavaParser.parse(in);
+		} finally {
+			in.close();
+		}
+		
+		new StringVisitor().visit(cu, null);
+		
+	}
 
 }
