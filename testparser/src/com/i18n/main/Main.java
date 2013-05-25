@@ -24,10 +24,10 @@ import com.i18n.file.FileHelper;
 import com.i18n.file.XmlHelper;
 import com.i18n.file.pinyinHelper;
 
-public class main {
+public class Main {
 
-	static HashMap<String, String> strMap = new HashMap<String, String>();
-	static XmlHelper xmlhelper;
+	HashMap<String, String> strMap = new HashMap<String, String>();
+	XmlHelper xmlhelper;
 	/**
 	 * @param args
 	 * @throws ParseException 
@@ -37,21 +37,23 @@ public class main {
 	 * @throws SAXException 
 	 */
 	public static void main(final String[] args) throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
-		
+		Main aa = new Main();
+	}
+	
+	public Main() throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
 		FileHelper file_help = new FileHelper();
 		List<File> fileList = file_help.getFileList("test/", "java");
+		xmlhelper = new XmlHelper.Builder()
+							.setDebug(false)
+							.setFilePath("out/string.xml").build();
 		for (File file : fileList) {
 			System.out.println("-->parsing:" + file.getAbsolutePath());
 			parserFile(file.getAbsolutePath());
 		}
-		xmlhelper= new XmlHelper.Builder()
-							.setDebug(false)
-							.setFilePath("out/string.xml").build();
-		
 		
 	}
 	
-	private static class StringVisitor extends VoidVisitorAdapter {
+	private class StringVisitor extends VoidVisitorAdapter {
         
         @Override
         public void visit(StringLiteralExpr n, Object arg) {
@@ -66,7 +68,7 @@ public class main {
         }
     }
 	
-	private static void parserFile(String filepath) throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
+	private void parserFile(String filepath) throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
 		FileInputStream in = new FileInputStream(filepath);
 		CompilationUnit cu ;
 		try {
@@ -75,8 +77,10 @@ public class main {
 			in.close();
 		}
 		
+		// find all hard code string, and put them to strMap
 		new StringVisitor().visit(cu, null);
 		
+		//write to xml file
 		xmlhelper.write(strMap);
 	}
 
