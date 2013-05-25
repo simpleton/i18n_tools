@@ -8,15 +8,16 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
 public class pinyinHelper {
+	
+	private static HanyuPinyinOutputFormat pin; 
 
 	public static String converterEname(String name)
 			throws BadHanyuPinyinOutputFormatCombination {
+		if (pin == null) {
+			getPinyin();
+		}
 		StringBuilder succeedPinyin = new StringBuilder();
-		HanyuPinyinOutputFormat pin = new HanyuPinyinOutputFormat();
-		pin.setCaseType(HanyuPinyinCaseType.UPPERCASE);// 大小写输出
-
-		pin.setToneType(HanyuPinyinToneType.WITH_TONE_NUMBER);// 音调设置
-		pin.setVCharType(HanyuPinyinVCharType.WITH_U_UNICODE);// 音调
+		
 		char[] ar = name.toCharArray();
 		for (int i = 0; i < ar.length; i++) {
 			String[] a = PinyinHelper.toHanyuPinyinStringArray(ar[i], pin);
@@ -28,7 +29,18 @@ public class pinyinHelper {
 		return succeedPinyin.toString();
 	}
 
+	private static void getPinyin() {
+		pin = new HanyuPinyinOutputFormat();
+		pin.setCaseType(HanyuPinyinCaseType.UPPERCASE);// 大小写输出
+
+		pin.setToneType(HanyuPinyinToneType.WITH_TONE_NUMBER);// 音调设置
+		pin.setVCharType(HanyuPinyinVCharType.WITH_U_UNICODE);// 音调
+	}
+	
 	public static String converterfirstStr(String str) {
+		if (pin == null) {
+			getPinyin();
+		}
 		StringBuilder succeedPinyin = new StringBuilder();
 		for (int i = 0; i < str.length(); i++) {
 			char ch = str.charAt(i);

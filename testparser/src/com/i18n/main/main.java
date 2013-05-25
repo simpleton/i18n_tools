@@ -10,18 +10,24 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+
 import org.xml.sax.SAXException;
 
 import com.i18n.file.FileHelper;
 import com.i18n.file.XmlHelper;
+import com.i18n.file.pinyinHelper;
 
 public class main {
 
+	static HashMap<String, String> strMap = new HashMap<String, String>();
+	static XmlHelper xmlhelper;
 	/**
 	 * @param args
 	 * @throws ParseException 
@@ -38,10 +44,10 @@ public class main {
 			System.out.println("-->parsing:" + file.getAbsolutePath());
 			parserFile(file.getAbsolutePath());
 		}
-		XmlHelper xmlhelper= new XmlHelper.Builder()
+		xmlhelper= new XmlHelper.Builder()
 							.setDebug(false)
 							.setFilePath("out/string.xml").build();
-		xmlhelper.write(new SimpleEntry<String, String>("name", "你好啦"));
+		
 		
 	}
 	
@@ -49,12 +55,18 @@ public class main {
         
         @Override
         public void visit(StringLiteralExpr n, Object arg) {
+        	String str = n.getValue();
         	System.out.println(n.getValue());
+        	try {
+				strMap.put(pinyinHelper.converterEname(str), str);
+			} catch (BadHanyuPinyinOutputFormatCombination e) {
+				e.printStackTrace();
+			}
         	super.visit(n, arg);
         }
     }
 	
-	private static void parserFile(String filepath) throws ParseException, IOException {
+	private static void parserFile(String filepath) throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
 		FileInputStream in = new FileInputStream(filepath);
 		CompilationUnit cu ;
 		try {
@@ -65,6 +77,7 @@ public class main {
 		
 		new StringVisitor().visit(cu, null);
 		
+		xmlhelper.write(strMap);
 	}
 
 }
