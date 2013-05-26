@@ -3,6 +3,8 @@ package com.i18n.main;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
+import japa.parser.ast.body.MethodDeclaration;
+import japa.parser.ast.body.Parameter;
 import japa.parser.ast.expr.StringLiteralExpr;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
@@ -29,7 +31,40 @@ public class Main {
 	private static final String IN_FOLDER = "test/";
 	private static final String OUT_FOLDER = "out/";
 	HashMap<String, String> strMap = new HashMap<String, String>();
+	Range ct_flag = new Range();
+	class Range{
+		Range() {
+			this.has_ct = false;
+		}
+		void setRange(boolean has_ct, int startline, int endline, String ct) {
+			this.has_ct = has_ct;
+			this.startline = startline;
+			this.endline = endline;
+			this.ct_name = ct;
+		}
+		
+		boolean getHas_ct() {
+			return this.has_ct;
+		}
+		
+		String getCt_name() {
+			return this.ct_name;
+		}
+		
+		boolean bIn_scope(int line) {
+			if (line >= startline && line <= endline) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		private boolean has_ct;
+		private int startline;
+		private int endline;
+		private String ct_name;
+	}
 	XmlHelper xmlhelper;
+	
 	/**
 	 * @param args
 	 * @throws ParseException 
@@ -69,8 +104,26 @@ public class Main {
 			} catch (BadHanyuPinyinOutputFormatCombination e) {
 				e.printStackTrace();
 			}
-        	
-        	n.setValue(new StringBuilder().append(prefix).append(key).append(suffix).toString());
+        	if (!ct_flag.getHas_ct() || !ct_flag.bIn_scope(n.getBeginLine())) {
+        		n.setValue(new StringBuilder().append(prefix).append(key).append(suffix).toString());
+        	} else {
+        		n.setValue(new StringBuilder().append(ct_flag.getCt_name()).append(".getString(")
+        									  .append(suffix).append(suffix).toString());
+        	}
+        	super.visit(n, arg);
+        }
+        
+        @Override
+        public void visit(MethodDeclaration n, Object arg) {
+        	System.out.println(n.getName());
+        	ct_flag.setRange(false, 0, 0, "");
+			if (n.getParameters() != null) {
+				for (Parameter pa : n.getParameters()) {
+					if (pa.getType().toString().equals("Context")) {
+						ct_flag.setRange(true, n.getBeginLine(), n.getEndLine(), pa.getId().getName());
+					}
+				}
+        	}
         	super.visit(n, arg);
         }
     }

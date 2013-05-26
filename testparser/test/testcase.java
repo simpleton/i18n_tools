@@ -11,7 +11,7 @@ public class testcase {
 
 	}
 	
-	public void testfunc() {
+	public void testfunc(Context ctaa, String test) {
 		String tmp = "世界";
 		String aaa = "wowowo我我我";
 	}
