@@ -13,7 +13,7 @@ public class FileHelper {
 		if (files != null) {
 			for (File file : files) {
 				if (file.isDirectory()) {
-					getFile(file.getAbsolutePath());
+					getFile(file.getPath());
 				} else {
 					fileList.add(file);
 				}
@@ -27,7 +27,7 @@ public class FileHelper {
 		if (files != null) {
 			for (File file : files) {
 				if (file.isDirectory()) {
-					getFile(file.getAbsolutePath() , suffix);
+					getFile(file.getPath() , suffix);
 				} else {
 					if (checkSuffix(file, suffix)) {
 						fileList.add(file);

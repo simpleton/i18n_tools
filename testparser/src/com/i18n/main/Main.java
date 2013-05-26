@@ -8,6 +8,8 @@ import japa.parser.ast.visitor.VoidVisitorAdapter;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +26,8 @@ import com.i18n.file.XmlHelper;
 import com.i18n.file.pinyinHelper;
 
 public class Main {
-	
+	private static final String IN_FOLDER = "test/";
+	private static final String OUT_FOLDER = "out/";
 	HashMap<String, String> strMap = new HashMap<String, String>();
 	XmlHelper xmlhelper;
 	/**
@@ -41,13 +44,13 @@ public class Main {
 	
 	public Main() throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
 		FileHelper file_help = new FileHelper();
-		List<File> fileList = file_help.getFileList("test/", "java");
+		List<File> fileList = file_help.getFileList(IN_FOLDER, "java");
 		xmlhelper = new XmlHelper.Builder()
 							.setDebug(false)
-							.setFilePath("out/string.xml").build();
+							.setFilePath(OUT_FOLDER + "string.xml").build();
 		for (File file : fileList) {
 			System.out.println("-->parsing:" + file.getAbsolutePath());
-			parserFile(file.getAbsolutePath());
+			parserFile(file);
 		}
 		
 	}
@@ -60,22 +63,20 @@ public class Main {
         	String str = n.getValue();
         	String key = null;
         	
-        	System.out.println(n.getValue());
         	try {
         		key = pinyinHelper.converterEname(str);
 				strMap.put(key, str);
 			} catch (BadHanyuPinyinOutputFormatCombination e) {
 				e.printStackTrace();
 			}
-        	n.setBeginColumn(n.getBeginColumn()-1);
         	
         	n.setValue(new StringBuilder().append(prefix).append(key).append(suffix).toString());
         	super.visit(n, arg);
         }
     }
 	
-	private void parserFile(String filepath) throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
-		FileInputStream in = new FileInputStream(filepath);
+	private void parserFile(File file) throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
+		FileInputStream in = new FileInputStream(file.getAbsoluteFile());
 		CompilationUnit cu ;
 		try {
 			cu = JavaParser.parse(in);
@@ -85,9 +86,23 @@ public class Main {
 		
 		// find all hard code string, and put them to strMap
 		new StringVisitor().visit(cu, null);
-		System.out.print(cu.toString());
+		
 		//write to xml file
 		xmlhelper.write(strMap);
+		//write to java file
+		File out = new File(new StringBuilder().append(OUT_FOLDER).append(file.getPath()).toString());
+		if (!out.getParentFile().exists()) {
+			out.getParentFile().mkdirs();
+		}
+		if (!out.exists()) {
+			out.createNewFile();
+		}
+		FileOutputStream fw = new FileOutputStream(out);
+		try {
+			fw.write(cu.toString().getBytes());
+		} finally {
+			fw.close();
+		}
 	}
 
 }
