@@ -9,7 +9,6 @@ import japa.parser.ast.visitor.VoidVisitorAdapter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,7 +24,7 @@ import com.i18n.file.XmlHelper;
 import com.i18n.file.pinyinHelper;
 
 public class Main {
-
+	
 	HashMap<String, String> strMap = new HashMap<String, String>();
 	XmlHelper xmlhelper;
 	/**
@@ -54,16 +53,23 @@ public class Main {
 	}
 	
 	private class StringVisitor extends VoidVisitorAdapter {
-        
+        private static final String prefix = "getContext().getString(R.id.";
+        private static final String suffix = ")";
         @Override
         public void visit(StringLiteralExpr n, Object arg) {
         	String str = n.getValue();
+        	String key = null;
+        	
         	System.out.println(n.getValue());
         	try {
-				strMap.put(pinyinHelper.converterEname(str), str);
+        		key = pinyinHelper.converterEname(str);
+				strMap.put(key, str);
 			} catch (BadHanyuPinyinOutputFormatCombination e) {
 				e.printStackTrace();
 			}
+        	n.setBeginColumn(n.getBeginColumn()-1);
+        	
+        	n.setValue(new StringBuilder().append(prefix).append(key).append(suffix).toString());
         	super.visit(n, arg);
         }
     }
@@ -79,7 +85,7 @@ public class Main {
 		
 		// find all hard code string, and put them to strMap
 		new StringVisitor().visit(cu, null);
-		
+		System.out.print(cu.toString());
 		//write to xml file
 		xmlhelper.write(strMap);
 	}

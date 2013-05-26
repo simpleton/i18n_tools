@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Júlio Vilmar Gesser.
+ * Copyright (C) 2007 Jï¿½lio Vilmar Gesser.
  * 
  * This file is part of Java 1.5 parser and Abstract Syntax Tree.
  *
@@ -720,9 +720,9 @@ public final class DumpVisitor implements VoidVisitor<Object> {
     }
 
     public void visit(StringLiteralExpr n, Object arg) {
-        printer.print("\"");
+        //printer.print("\"");
         printer.print(n.getValue());
-        printer.print("\"");
+        //printer.print("\"");
     }
 
     public void visit(BooleanLiteralExpr n, Object arg) {
