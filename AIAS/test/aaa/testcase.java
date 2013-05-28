@@ -14,6 +14,9 @@ public class testcase {
 	public void testfunc() {
 		String tmp = "世界";
 		String aaa = "wowowo我我我";
+		String dfa = "世界";
+		String nifda = "你好";
+		String aadfa = "世界你好";
 	}
 
 }
