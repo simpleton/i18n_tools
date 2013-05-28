@@ -1,5 +1,7 @@
 package com.i18n.keymaker;
 
+import com.i18n.parser.util.ILog;
+
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -10,7 +12,7 @@ import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombi
 public class pinyinHelper implements IKeyMakerHelper{
 	
 	private static HanyuPinyinOutputFormat pin; 
-	
+
 	public String converterEname(String name)
 			throws BadHanyuPinyinOutputFormatCombination {
 		getPinyin();
@@ -57,7 +59,6 @@ public class pinyinHelper implements IKeyMakerHelper{
 	@Override
 	public String convert(String key) throws BadHanyuPinyinOutputFormatCombination {
 		key = converterEname(key).replaceAll("(\\r|\\n|\"|\\\\| )", "").trim();
-		System.out.println(key);
 		return key;
 	}
 }
