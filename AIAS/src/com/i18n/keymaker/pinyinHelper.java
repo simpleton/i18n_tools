@@ -56,6 +56,8 @@ public class pinyinHelper implements IKeyMakerHelper{
 
 	@Override
 	public String convert(String key) throws BadHanyuPinyinOutputFormatCombination {
-		return converterEname(key);
+		key = converterEname(key).replaceAll("(\\r|\n|\"| )", "");
+		System.out.println(key);
+		return key;
 	}
 }
