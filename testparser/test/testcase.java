@@ -1,8 +1,6 @@
 
 public class testcase {
 
-	
-	String tmp = "你好";
 	/**
 	 * @param args
 	 */
@@ -13,7 +11,15 @@ public class testcase {
 	
 	public void testfunc(Context ctaa, String test) {
 		String tmp = "世界";
-		String aaa = "wowowo我我我";
+		String aaa = "wowowo \n\"我我\"我";
 	}
 
+	
+	private void aaa(Context aaa) {
+		String test = "你好你好";
+	}
+	
+	public void aaa() {
+		String aaa = "发动机卡里";
+	}
 }
