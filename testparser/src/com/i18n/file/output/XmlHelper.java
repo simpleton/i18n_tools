@@ -1,4 +1,4 @@
-package com.i18n.file;
+package com.i18n.file.output;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-public class XmlHelper {
+public class XmlHelper implements IOutputHelper{
 	private static final String RESOURCES = "resources";
 	private static final String STRING_KEY = "string";
 	private static final String STRING_ATTR = "name";
@@ -90,6 +90,7 @@ public class XmlHelper {
 		
 		writeDoc(doc);
 	}
+	
 	private void writeDoc(Document doc)
 			throws TransformerFactoryConfigurationError,TransformerConfigurationException, TransformerException {
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
