@@ -17,6 +17,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -53,6 +55,8 @@ public class StringParser {
 	private final IKeyMakerHelper key_maker;
 	
 	
+	private Pattern pat;
+	
 	private StringParser(String in_folder, String out_folder, String xml_file, StringFilterType type, IOutputHelper out_helper,
 			IKeyMakerHelper km, boolean debug, ILog log) {
 		this.debug = debug;
@@ -63,6 +67,8 @@ public class StringParser {
 		this.output_client = out_helper;
 		this.key_maker = km;
 		this.log = log;
+		
+		pat = Pattern.compile(type.getRegex());
 	}
 	
 	public void run() throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
@@ -105,45 +111,60 @@ public class StringParser {
 	}
 	
 	private class StringVisitor extends VoidVisitorAdapter {
-        private static final String prefix = "getContext().getString(R.string.";
-        private static final String suffix = ")";
-        @Override
-        public void visit(StringLiteralExpr n, Object arg) {
-        	String str = n.getValue();
-        	String key = null;
-        	
-        	try {
-        		key = key_maker.convert(str);
-				strMap.put(key, str);
-			} catch (BadHanyuPinyinOutputFormatCombination e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
+		private static final String prefix = "getContext().getString(R.string.";
+		private static final String suffix = ")";
+
+		@Override
+		public void visit(StringLiteralExpr n, Object arg) {
+			String str = n.getValue();
+			String key = null;
+
+			if (isContainsFilter(str)) {
+				try {
+					key = key_maker.convert(str);
+					strMap.put(key, str);
+				} catch (BadHanyuPinyinOutputFormatCombination e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				if (!ct_flag.getHas_ct()
+						|| !ct_flag.bIn_scope(n.getBeginLine())) {
+					n.setValue(new StringBuilder().append(prefix).append(key)
+							.append(suffix).toString());
+				} else {
+					n.setValue(new StringBuilder().append(ct_flag.getCt_name()).append(".getString(R.string.")
+												  .append(key).append(suffix).toString());
+				}
+			} else {
+				n.setValue('"' + str + '"');
 			}
-        	
-        	if (!ct_flag.getHas_ct() || !ct_flag.bIn_scope(n.getBeginLine())) {
-        		n.setValue(new StringBuilder().append(prefix).append(key).append(suffix).toString());
-        	} else {
-        		n.setValue(new StringBuilder().append(ct_flag.getCt_name()).append(".getString(R.id.")
-        									  .append(key).append(suffix).toString());
-        	}
-        	super.visit(n, arg);
-        }
-        
-        @Override
-        public void visit(MethodDeclaration n, Object arg) {
-        	System.out.println(n.getName());
-        	ct_flag.setRange(false, 0, 0, "");
+			super.visit(n, arg);
+		}
+
+		private boolean isContainsFilter(String str) {
+			Matcher match = pat.matcher(str);
+			if (match.find()) {
+				return true;
+			} 
+			return false;
+		}
+
+		@Override
+		public void visit(MethodDeclaration n, Object arg) {
+			ct_flag.setRange(false, 0, 0, "");
 			if (n.getParameters() != null) {
 				for (Parameter pa : n.getParameters()) {
 					if (pa.getType().toString().equals("Context")) {
-						ct_flag.setRange(true, n.getBeginLine(), n.getEndLine(), pa.getId().getName());
+						ct_flag.setRange(true, n.getBeginLine(),
+								n.getEndLine(), pa.getId().getName());
 					}
 				}
-        	}
-        	super.visit(n, arg);
-        }
-    }
+			}
+			super.visit(n, arg);
+		}
+	}
 	
 	private void parserFile(File file) throws ParseException, IOException, ParserConfigurationException, TransformerException, SAXException {
 		log.d("Start parse" + file.getPath());

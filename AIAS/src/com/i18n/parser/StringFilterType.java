@@ -15,11 +15,11 @@ public enum StringFilterType {
 	/**
 	 * only filter chinese character 
 	 */
-	CH("*"),
+	CH("[\u4e00-\u9fa5]"),
 	/**
 	 * only filter english character
 	 */
-	EN("");
+	EN("\\w");
 	
 	private String regx;
 	
@@ -27,7 +27,7 @@ public enum StringFilterType {
 		this.regx  = reg;
 	}
 	
-	public String getReg() {
+	public String getRegex() {
 		return this.regx;
 	}	
 }

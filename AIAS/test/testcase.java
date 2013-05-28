@@ -12,6 +12,7 @@ public class testcase {
 	public void testfunc(Context ctaa, String test) {
 		String tmp = "世界";
 		String aaa = "wowowo \n\"我我\"我";
+		String en = "This is englis sentence";
 	}
 
 	

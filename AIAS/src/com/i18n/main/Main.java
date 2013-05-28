@@ -12,6 +12,7 @@ import org.xml.sax.SAXException;
 import com.i18n.file.output.IOutputHelper;
 import com.i18n.file.output.XmlHelper;
 import com.i18n.keymaker.pinyinHelper;
+import com.i18n.parser.StringFilterType;
 import com.i18n.parser.StringParser;
 
 public class Main {
@@ -33,6 +34,7 @@ public class Main {
 		StringParser parser = new StringParser.Builder().setDebug(true)
 														.setInputFolder("test/")
 														.setOutputFolder("out/")
+														.setFilterType(StringFilterType.CH)
 														.setKeyMakerHelper(new pinyinHelper())
 														.setOutputClient(out_helper).build();
 		parser.run();
