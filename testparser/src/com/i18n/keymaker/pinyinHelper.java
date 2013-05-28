@@ -1,4 +1,4 @@
-package com.i18n.file;
+package com.i18n.keymaker;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
@@ -7,15 +7,14 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
-public class pinyinHelper {
+public class pinyinHelper implements IKeyMakerHelper{
 	
 	private static HanyuPinyinOutputFormat pin; 
-
-	public static String converterEname(String name)
+	
+	public String converterEname(String name)
 			throws BadHanyuPinyinOutputFormatCombination {
-		if (pin == null) {
-			getPinyin();
-		}
+		getPinyin();
+
 		StringBuilder succeedPinyin = new StringBuilder();
 		
 		char[] ar = name.toCharArray();
@@ -29,18 +28,20 @@ public class pinyinHelper {
 		return succeedPinyin.toString();
 	}
 
-	private static void getPinyin() {
-		pin = new HanyuPinyinOutputFormat();
-		pin.setCaseType(HanyuPinyinCaseType.UPPERCASE);// 大小写输出
+	private HanyuPinyinOutputFormat getPinyin() {
+		synchronized (pinyinHelper.class) {
+			if (pin == null) {
+				pin = new HanyuPinyinOutputFormat();
+				pin.setCaseType(HanyuPinyinCaseType.UPPERCASE);// 大小写输出
 
-		pin.setToneType(HanyuPinyinToneType.WITH_TONE_NUMBER);// 音调设置
-		pin.setVCharType(HanyuPinyinVCharType.WITH_U_UNICODE);// 音调
+				pin.setToneType(HanyuPinyinToneType.WITH_TONE_NUMBER);// 音调设置
+				pin.setVCharType(HanyuPinyinVCharType.WITH_U_UNICODE);// 音调
+			}
+		}
+		return pin;		
 	}
 	
-	public static String converterfirstStr(String str) {
-		if (pin == null) {
-			getPinyin();
-		}
+	public String converterfirstStr(String str) {
 		StringBuilder succeedPinyin = new StringBuilder();
 		for (int i = 0; i < str.length(); i++) {
 			char ch = str.charAt(i);
@@ -52,15 +53,9 @@ public class pinyinHelper {
 		}
 		return succeedPinyin.toString();
 	}
-//
-//	public static void main(String[] args) {
-//		try {
-//			System.out.println(converterEname("张解封口袋里1")); // 带音调输出：zhāng
-//			System.out.println(converterfirstStr("你是张1吗？"));// 只取首字母
-//
-//		} catch (BadHanyuPinyinOutputFormatCombination e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
+
+	@Override
+	public String convert(String key) throws BadHanyuPinyinOutputFormatCombination {
+		return converterEname(key);
+	}
 }
