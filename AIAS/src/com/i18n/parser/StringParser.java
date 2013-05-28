@@ -249,12 +249,12 @@ public class StringParser {
 			this.key_maker = mk;
 			return this;
 		}
-		public StringParser build() throws ParserConfigurationException, TransformerException {
+		public StringParser build() throws ParserConfigurationException, TransformerException, IOException {
 			ensureSaneDefaults();
 			return new StringParser(in_folder, out_folder, xml_file, filter_type, output_client, key_maker, debug, mlog);
 		}
 		
-		private void ensureSaneDefaults() throws ParserConfigurationException, TransformerException {
+		private void ensureSaneDefaults() throws ParserConfigurationException, TransformerException, IOException {
 			if (xml_file == null) {
 				xml_file = "./string.xml";
 			}

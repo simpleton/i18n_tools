@@ -31,13 +31,13 @@ public class XmlHelper implements IOutputHelper{
 	private final String outFilePath;
 	
 	
-	private XmlHelper(String filepath, boolean debug) throws ParserConfigurationException, TransformerException {
+	private XmlHelper(String filepath, boolean debug) throws ParserConfigurationException, TransformerException, IOException {
 		this.outFilePath = filepath;
 		this.debug = debug;
 		
 		checkXmlFile(filepath);
 	}
-	private boolean checkXmlFile(String filepath) throws ParserConfigurationException, TransformerException {
+	private boolean checkXmlFile(String filepath) throws ParserConfigurationException, TransformerException, IOException {
 		File file = new File(filepath);
 		if (file.exists()) {
 			return true;
@@ -55,7 +55,16 @@ public class XmlHelper implements IOutputHelper{
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
 			StreamResult result;
-			result = new StreamResult(new File(outFilePath));	
+			File out_file = new File(outFilePath);
+			File parent = new File(out_file.getParent());
+			if (!parent.exists()) {
+				parent.mkdirs();
+			}
+			if (!out_file.exists()) {
+				out_file.createNewFile();
+			}
+			result = new StreamResult(out_file);		
+			
 					 
 			transformer.transform(source, result);
 		}
@@ -130,7 +139,7 @@ public class XmlHelper implements IOutputHelper{
 					
 		}
 		
-		public XmlHelper build() throws ParserConfigurationException, TransformerException {
+		public XmlHelper build() throws ParserConfigurationException, TransformerException, IOException {
 			ensureSaneDefaults();
 			return new XmlHelper(filepath, debug);
 		}
